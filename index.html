@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matheus · E-books</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --cream: #faf8f5;
+    --warm-white: #ffffff;
+    --ink: #1a1814;
+    --muted: #8a8580;
+    --accent: #c9a96e;
+    --accent-light: #f0e6d3;
+    --border: #ede9e3;
+    --shadow: rgba(26,24,20,0.08);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 16px 60px;
+    color: var(--ink);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { width: 100%; max-width: 420px; position: relative; z-index: 1; }
+
+  .profile { text-align: center; margin-bottom: 32px; animation: fadeUp 0.6s ease both; }
+
+  .avatar-wrap { display: inline-block; position: relative; margin-bottom: 16px; }
+
+  .avatar {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-light), var(--accent));
+    border: 3px solid var(--warm-white);
+    box-shadow: 0 4px 20px var(--shadow);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .avatar-ring {
+    position: absolute; inset: -5px; border-radius: 50%;
+    border: 1.5px dashed var(--accent); opacity: 0.5;
+    animation: spin 12s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .profile-name { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+  .profile-handle { color: var(--muted); font-size: 14px; margin-bottom: 12px; }
+  .profile-bio { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 300px; margin: 0 auto; }
+  .profile-bio strong { color: var(--ink); font-weight: 600; }
+
+  .stats {
+    display: flex; justify-content: center; gap: 28px;
+    margin: 20px 0 32px; padding: 16px;
+    background: var(--warm-white); border-radius: 14px; border: 1px solid var(--border);
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--ink); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-left: 2px; }
+
+  /* Grupo de e-books (normal + premium) */
+  .ebook-group { margin-bottom: 20px; }
+  .group-title { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; padding-left: 4px; }
+
+  .cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+
+  .card {
+    background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px;
+    padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+    text-decoration: none; color: var(--ink); transition: all 0.25s ease;
+    position: relative; overflow: hidden; cursor: pointer;
+    animation: fadeUp 0.6s ease both;
+  }
+  .card:nth-child(1) { animation-delay: 0.12s; }
+  .card:nth-child(2) { animation-delay: 0.18s; }
+
+  .card::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 0%, var(--accent-light) 100%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px var(--shadow); }
+  .card:hover::after { opacity: 1; }
+
+  /* Card premium tem borda dourada sutil */
+  .card.premium { border-color: rgba(201,169,110,0.35); background: linear-gradient(135deg, #fff 80%, #fdf6ec); }
+
+  .card-icon {
+    width: 44px; height: 44px; border-radius: 11px; background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+    flex-shrink: 0; position: relative; z-index: 1; transition: transform 0.25s;
+  }
+  .card.premium .card-icon { background: linear-gradient(135deg, #f0e6d3, #e8d5b0); }
+  .card:hover .card-icon { transform: scale(1.08); }
+
+  .card-content { flex: 1; position: relative; z-index: 1; min-width: 0; }
+  .card-title { font-weight: 600; font-size: 14px; margin-bottom: 3px; letter-spacing: -0.1px; line-height: 1.3; }
+  .card-sub { font-size: 11px; color: var(--muted); }
+
+  .card-right { position: relative; z-index: 1; text-align: right; flex-shrink: 0; }
+  .card-price { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--accent); }
+  .card-price.premium-price { color: var(--accent); }
+
+  .badge {
+    position: absolute; top: -1px; right: 12px;
+    color: white; font-size: 9px; font-weight: 700;
+    padding: 3px 8px; border-radius: 0 0 6px 6px;
+    letter-spacing: 0.8px; text-transform: uppercase; z-index: 2;
+    background: var(--accent);
+  }
+  .badge.green { background: #2d7a4f; }
+  .badge.blue  { background: #2563eb; }
+
+  /* Separador entre grupos */
+  .group-sep { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
+
+  .socials {
+    display: flex; justify-content: center; gap: 12px;
+    margin-bottom: 24px; animation: fadeUp 0.6s 0.5s ease both;
+  }
+  .social-btn {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--warm-white); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; text-decoration: none; transition: all 0.2s; cursor: pointer;
+  }
+  .social-btn:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 16px var(--shadow); }
+
+  .footer { text-align: center; font-size: 11px; color: var(--muted); animation: fadeUp 0.6s 0.6s ease both; }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Perfil -->
+  <div class="profile">
+    <div class="avatar-wrap">
+      <div class="avatar">
+        <img src="https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/8a7bf120ac6d0bd56c91e8cfd4a29f43~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=785df04f&x-expires=1772546400&x-signature=y%2Fszl9h0FRkdqnshM83Gsx8NSOE%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" alt="Matheus">
+      </div>
+      <div class="avatar-ring"></div>
+    </div>
+    <h1 class="profile-name">Matheus Jesus</h1>
+    <p class="profile-handle">@theuzin.txt.edits</p>
+    <p class="profile-bio">📚 E-books práticos para você <strong>transformar sua vida</strong> e conquistar seus objetivos.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">E-books</div></div>
+    <div class="stat"><div class="stat-num">4.9★</div><div class="stat-label">Avaliação</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Seguro</div></div>
+  </div>
+
+  <!-- Grupo 1: Pare de fumar -->
+  <p class="section-label">🚬 Pare de Fumar</p>
+  <div class="ebook-group">
+    <div class="cards">
+      <a class="card" href="https://pay.kiwify.com.br/tRcJ1Na" target="_blank">
+        <div class="card-icon">📖</div>
+        <div class="card-content">
+          <div class="card-title">Pare de fumar em 7 dias</div>
+          <div class="card-sub">E-book completo · PDF</div>
+        </div>
+        <div class="card-right">
+          <div class="card-price">R$9,90</div>
+        </div>
+      </a>
+      <a class="card premium" href="https://pay.kiwify.com.br/2K1MEez" target="_blank">
+        <div class="badge">⭐ Premium</div>
+        <div class="card-icon">✨</div>
+        <div class="card-content">
+          <div class="card-title">Pare de fumar em 7 dias — Versão Premium</div>
+          <div class="card-sub">Conteúdo exclusivo + bônus</div>
+        </div>
+        <div class="card-right">
+          <div class="card-price premium-price">R$15,00</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <hr class="group-sep">
+
+  <!-- Grupo 2: Luxúria -->
+  <p class="section-label">🧠 Vício da Luxúria</p>
+  <div class="ebook-group">
+    <div class="cards">
+      <a class="card" href="https://pay.kiwify.com.br/BgT5ynv" target="_blank">
+        <div class="card-icon">📖</div>
+        <div class="card-content">
+          <div class="card-title">Pare de vez com o vício da Luxúria</div>
+          <div class="card-sub">E-book completo · PDF</div>
+        </div>
+        <div class="card-right">
+          <div class="card-price">R$9,90</div>
+        </div>
+      </a>
+      <a class="card premium" href="https://pay.kiwify.com.br/xoPGyul" target="_blank">
+        <div class="badge">⭐ Premium</div>
+        <div class="card-icon">✨</div>
+        <div class="card-content">
+          <div class="card-title">Pare de vez com o vício da Luxúria — Premium</div>
+          <div class="card-sub">Conteúdo exclusivo + bônus</div>
+        </div>
+        <div class="card-right">
+          <div class="card-price premium-price">R$15,00</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <hr class="group-sep">
+
+  <!-- Grupo 3: Marketing Digital -->
+  <p class="section-label">💼 Marketing Digital</p>
+  <div class="ebook-group">
+    <div class="cards">
+      <a class="card" href="https://pay.kiwify.com.br/QADsAL7" target="_blank">
+        <div class="card-icon">📖</div>
+        <div class="card-content">
+          <div class="card-title">Aprenda a trabalhar com Marketing Digital</div>
+          <div class="card-sub">E-book completo · PDF</div>
+        </div>
+        <div class="card-right">
+          <div class="card-price">R$9,90</div>
+        </div>
+      </a>
+      <a class="card premium" href="https://pay.kiwify.com.br/H0tbbgU" target="_blank">
+        <div class="badge">⭐ Premium</div>
+        <div class="card-icon">✨</div>
+        <div class="card-content">
+          <div class="card-title">Marketing Digital de vez — Versão Premium</div>
+          <div class="card-sub">Conteúdo exclusivo + bônus</div>
+        </div>
+        <div class="card-right">
+          <div class="card-price premium-price">R$15,00</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <hr class="group-sep">
+
+  <!-- Redes sociais -->
+  <p class="section-label" style="text-align:center;">Me siga</p>
+  <div class="socials">
+    <a class="social-btn" href="https://instagram.com/theuzin.txt.edits" target="_blank" title="Instagram">📸</a>
+    <a class="social-btn" href="https://tiktok.com/@theuzin.txt01" target="_blank" title="TikTok">🎵</a>
+  </div>
+
+  <div class="footer">
+    Feito por ducalofc · Pagamento seguro via <a href="https://kiwify.com.br" target="_blank">Kiwify</a>
+  </div>
+
+</div>
+</body>
+</html>
