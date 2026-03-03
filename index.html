@@ -1,285 +1,495 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matheus · E-books</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>E-books</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* =====================================================
+     NÃO EDITE ESTE ARQUIVO — edite config.js e i18n.js
+     As cores são injetadas via JS a partir do config.js
+  ===================================================== */
+
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --cream: #faf8f5;
-    --warm-white: #ffffff;
-    --ink: #1a1814;
-    --muted: #8a8580;
-    --accent: #c9a96e;
-    --accent-light: #f0e6d3;
-    --border: #ede9e3;
-    --shadow: rgba(26,24,20,0.08);
+    --accent:        #6d28d9;
+    --accent-deep:   #3b0066;
+    --accent-soft:   #8b5cf6;
+
+    --bg:            #ffffff;
+    --bg-card:       #ffffff;
+    --bg-stats:      #ffffff;
+    --bg-pill:       #f5f3ff;
+    --bg-icon:       #f5f3ff;
+    --bg-social:     #ffffff;
+
+    --ink:           #1a0a2e;
+    --muted:         #7c6fa0;
+    --bio-color:     #5a4a7a;
+
+    --border:        rgba(109,40,217,0.12);
+    --border-strong: rgba(109,40,217,0.28);
+    --sep:           rgba(109,40,217,0.15);
+
+    --shadow-sm:     0 2px 14px rgba(59,0,102,0.07);
+    --shadow-md:     0 8px 32px rgba(59,0,102,0.13);
+
+    --split-left:    #ffffff;
+    --split-right:   #ede9ff;
+    --split-angle:   118deg;
+    --split-ratio:   54%;
+
+    --toggle-bg:     #f5f3ff;
+    --toggle-border: rgba(109,40,217,0.2);
+  }
+
+  [data-theme="dark"] {
+    --bg:            #0e0820;
+    --bg-card:       #1a1030;
+    --bg-stats:      #1a1030;
+    --bg-pill:       rgba(109,40,217,0.18);
+    --bg-icon:       rgba(109,40,217,0.15);
+    --bg-social:     #1a1030;
+
+    --ink:           #f0eaff;
+    --muted:         #9b8bbf;
+    --bio-color:     #b8a8d8;
+
+    --border:        rgba(168,85,247,0.15);
+    --border-strong: rgba(168,85,247,0.35);
+    --sep:           rgba(168,85,247,0.2);
+
+    --shadow-sm:     0 2px 14px rgba(0,0,0,0.3);
+    --shadow-md:     0 8px 32px rgba(0,0,0,0.45);
+
+    --split-left:    #0e0820;
+    --split-right:   #180d34;
+
+    --toggle-bg:     rgba(168,85,247,0.15);
+    --toggle-border: rgba(168,85,247,0.3);
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
+    font-family: 'Outfit', sans-serif;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 40px 16px 60px;
+    display: flex; justify-content: center; align-items: flex-start;
+    padding: 0 16px 80px;
     color: var(--ink);
+    overflow-x: hidden;
+    transition: color 0.45s;
   }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
+  .bg-split {
+    position: fixed; inset: 0; z-index: 0;
+    background: linear-gradient(
+      var(--split-angle),
+      var(--split-left)  0%,
+      var(--split-left)  var(--split-ratio),
+      var(--split-right) var(--split-ratio),
+      var(--split-right) 100%
+    );
+    transition: background 0.45s;
+  }
+  .bg-glow {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 90% 55% at 30% -5%, rgba(109,40,217,0.13) 0%, transparent 65%),
+      radial-gradient(ellipse 55% 45% at 85% 95%, rgba(139,92,246,0.18) 0%, transparent 60%);
   }
 
-  .container { width: 100%; max-width: 420px; position: relative; z-index: 1; }
+  /* ── CONTROLES (tema + idioma) ── */
+  .controls {
+    position: fixed; top: 16px; right: 16px; z-index: 200;
+    display: flex; gap: 8px; align-items: center;
+  }
 
-  .profile { text-align: center; margin-bottom: 32px; animation: fadeUp 0.6s ease both; }
+  .lang-selector {
+    display: flex; gap: 4px; align-items: center;
+    background: var(--toggle-bg); border: 1px solid var(--toggle-border);
+    border-radius: 12px; padding: 4px 6px;
+    transition: background 0.45s, border-color 0.45s;
+  }
+  .lang-btn {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 4px 8px; border-radius: 8px; border: none; background: none;
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+  }
+  .lang-btn.active {
+    background: var(--accent); color: #fff;
+    box-shadow: 0 2px 8px rgba(109,40,217,0.3);
+  }
+  .lang-btn:hover:not(.active) { color: var(--ink); }
 
-  .avatar-wrap { display: inline-block; position: relative; margin-bottom: 16px; }
-
-  .avatar {
-    width: 88px; height: 88px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent-light), var(--accent));
-    border: 3px solid var(--warm-white);
-    box-shadow: 0 4px 20px var(--shadow);
-    overflow: hidden;
+  .theme-toggle {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--toggle-bg); border: 1px solid var(--toggle-border);
     display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; outline: none;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1), background 0.45s, border-color 0.45s;
+  }
+  .theme-toggle:hover { transform: scale(1.1) rotate(10deg); }
+
+  /* ── CONTAINER ── */
+  .container { width: 100%; max-width: 440px; position: relative; z-index: 1; padding-top: 72px; }
+
+  /* ── PROFILE ── */
+  .profile { text-align: center; margin-bottom: 32px; animation: fadeUp 0.7s ease both; }
+  .avatar-wrap { display: inline-block; position: relative; margin-bottom: 18px; }
+  .avatar {
+    width: 92px; height: 92px; border-radius: 50%;
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--border-strong), var(--shadow-md);
+    overflow: hidden; position: relative;
+    transition: border-color 0.45s, box-shadow 0.45s;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
+  .avatar::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: linear-gradient(135deg, rgba(109,40,217,0.15) 0%, transparent 55%);
+  }
   .avatar-ring {
-    position: absolute; inset: -5px; border-radius: 50%;
-    border: 1.5px dashed var(--accent); opacity: 0.5;
-    animation: spin 12s linear infinite;
+    position: absolute; inset: -8px; border-radius: 50%;
+    border: 1.5px dashed var(--border-strong);
+    animation: spin 14s linear infinite; transition: border-color 0.45s;
+  }
+  .avatar-ring::before {
+    content: ''; position: absolute;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    top: 50%; left: -3.5px; transform: translateY(-50%);
+    box-shadow: 0 0 10px rgba(109,40,217,0.7);
+    transition: background 0.45s;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .profile-name { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
-  .profile-handle { color: var(--muted); font-size: 14px; margin-bottom: 12px; }
-  .profile-bio { font-size: 14px; color: var(--muted); line-height: 1.6; max-width: 300px; margin: 0 auto; }
-  .profile-bio strong { color: var(--ink); font-weight: 600; }
-
-  .stats {
-    display: flex; justify-content: center; gap: 28px;
-    margin: 20px 0 32px; padding: 16px;
-    background: var(--warm-white); border-radius: 14px; border: 1px solid var(--border);
-    animation: fadeUp 0.6s 0.1s ease both;
+  .verified-badge {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    border: 2px solid var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; z-index: 2; color: #fff; font-weight: 700;
+    transition: border-color 0.45s;
   }
-  .stat { text-align: center; }
-  .stat-num { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--ink); }
-  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 0.5px; text-transform: uppercase; }
 
-  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; padding-left: 2px; }
+  .profile-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px;
+    background: linear-gradient(135deg, var(--accent-deep) 0%, var(--accent) 60%, var(--accent-soft) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .profile-handle { color: var(--muted); font-size: 13px; margin-bottom: 14px; transition: color 0.45s; }
+  .profile-bio { font-size: 13.5px; color: var(--bio-color); line-height: 1.65; max-width: 290px; margin: 0 auto; transition: color 0.45s; }
+  .profile-bio strong { color: var(--accent); font-weight: 600; }
 
-  /* Grupo de e-books (normal + premium) */
-  .ebook-group { margin-bottom: 20px; }
-  .group-title { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; padding-left: 4px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--bg-pill); border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 14px;
+    font-size: 11px; font-weight: 600; color: var(--accent);
+    margin-top: 14px; letter-spacing: 0.3px;
+    transition: all 0.45s;
+  }
 
-  .cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+  /* ── STATS ── */
+  .stats {
+    display: flex; margin: 0 0 32px;
+    background: var(--bg-stats); border: 1px solid var(--border);
+    border-radius: 18px; box-shadow: var(--shadow-sm); overflow: hidden;
+    animation: fadeUp 0.7s 0.1s ease both;
+    transition: background 0.45s, border-color 0.45s;
+  }
+  .stat { flex: 1; text-align: center; padding: 18px 12px; position: relative; }
+  .stat + .stat::before {
+    content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 1px; background: var(--border); transition: background 0.45s;
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent-soft));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .stat-label { font-size: 10px; color: var(--muted); margin-top: 3px; letter-spacing: 0.8px; text-transform: uppercase; font-weight: 500; transition: color 0.45s; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.8px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 12px; padding-left: 2px;
+    display: flex; align-items: center; gap: 8px; transition: color 0.45s;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--sep), transparent); }
+
+  /* ── CARDS ── */
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+  .ebook-group { margin-bottom: 8px; }
 
   .card {
-    background: var(--warm-white); border: 1px solid var(--border); border-radius: 16px;
-    padding: 16px 18px; display: flex; align-items: center; gap: 14px;
-    text-decoration: none; color: var(--ink); transition: all 0.25s ease;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px;
+    text-decoration: none; color: var(--ink);
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.3s, border-color 0.3s, background 0.45s, color 0.45s;
     position: relative; overflow: hidden; cursor: pointer;
+    box-shadow: var(--shadow-sm);
     animation: fadeUp 0.6s ease both;
   }
-  .card:nth-child(1) { animation-delay: 0.12s; }
-  .card:nth-child(2) { animation-delay: 0.18s; }
-
-  .card::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(120deg, transparent 0%, var(--accent-light) 100%);
-    opacity: 0; transition: opacity 0.3s;
+  .card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; border-radius: 0 2px 2px 0;
+    background: linear-gradient(180deg, var(--accent), var(--accent-soft));
+    opacity: 0; transition: opacity 0.25s;
   }
-  .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 28px var(--shadow); }
-  .card:hover::after { opacity: 1; }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .card:hover::before { opacity: 1; }
 
-  /* Card premium tem borda dourada sutil */
-  .card.premium { border-color: rgba(201,169,110,0.35); background: linear-gradient(135deg, #fff 80%, #fdf6ec); }
+  [data-theme="light"] .card.premium { background: linear-gradient(135deg, #fff 60%, #f5f3ff); }
+  [data-theme="dark"]  .card.premium { background: linear-gradient(135deg, #1e1238 60%, #241648); }
+  .card.premium { border-color: var(--border-strong); }
+  .card.premium::before { background: linear-gradient(180deg, #c4a000, #f0d060); }
 
   .card-icon {
-    width: 44px; height: 44px; border-radius: 11px; background: var(--accent-light);
-    display: flex; align-items: center; justify-content: center; font-size: 20px;
-    flex-shrink: 0; position: relative; z-index: 1; transition: transform 0.25s;
+    width: 46px; height: 46px; border-radius: 13px;
+    background: var(--bg-icon);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+    transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), background 0.45s;
   }
-  .card.premium .card-icon { background: linear-gradient(135deg, #f0e6d3, #e8d5b0); }
-  .card:hover .card-icon { transform: scale(1.08); }
+  [data-theme="light"] .card.premium .card-icon { background: linear-gradient(135deg, #fef9e7, #fdf0c8); }
+  [data-theme="dark"]  .card.premium .card-icon { background: linear-gradient(135deg, rgba(70,52,0,0.7), rgba(90,65,0,0.7)); }
+  .card:hover .card-icon { transform: scale(1.1) rotate(-4deg); }
 
-  .card-content { flex: 1; position: relative; z-index: 1; min-width: 0; }
-  .card-title { font-weight: 600; font-size: 14px; margin-bottom: 3px; letter-spacing: -0.1px; line-height: 1.3; }
-  .card-sub { font-size: 11px; color: var(--muted); }
+  .card-content { flex: 1; min-width: 0; }
+  .card-title { font-weight: 600; font-size: 14px; margin-bottom: 3px; line-height: 1.35; }
+  .card-sub { font-size: 11px; color: var(--muted); transition: color 0.45s; }
 
-  .card-right { position: relative; z-index: 1; text-align: right; flex-shrink: 0; }
-  .card-price { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--accent); }
-  .card-price.premium-price { color: var(--accent); }
+  .card-right { text-align: right; flex-shrink: 0; }
+  .card-price {
+    font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .arrow { font-size: 11px; color: var(--muted); opacity: 0; transform: translateX(-4px); transition: all 0.2s; margin-top: 4px; }
+  .card:hover .arrow { opacity: 1; transform: translateX(0); }
 
   .badge {
-    position: absolute; top: -1px; right: 12px;
-    color: white; font-size: 9px; font-weight: 700;
-    padding: 3px 8px; border-radius: 0 0 6px 6px;
-    letter-spacing: 0.8px; text-transform: uppercase; z-index: 2;
-    background: var(--accent);
+    position: absolute; top: 0; right: 14px;
+    font-size: 9px; font-weight: 700; padding: 4px 10px;
+    border-radius: 0 0 8px 8px; letter-spacing: 0.8px; text-transform: uppercase; z-index: 2;
+    background: linear-gradient(135deg, #b8960a, #e8c83a);
+    color: #fff; box-shadow: 0 2px 8px rgba(184,150,10,0.35);
   }
-  .badge.green { background: #2d7a4f; }
-  .badge.blue  { background: #2563eb; }
 
-  /* Separador entre grupos */
-  .group-sep { border: none; border-top: 1px dashed var(--border); margin: 20px 0; }
-
-  .socials {
-    display: flex; justify-content: center; gap: 12px;
-    margin-bottom: 24px; animation: fadeUp 0.6s 0.5s ease both;
+  /* ── SEPARATOR ── */
+  .group-sep {
+    border: none; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--sep), transparent);
+    margin: 22px 0; transition: background 0.45s;
   }
+
+  /* ── SOCIALS ── */
+  .socials { display: flex; justify-content: center; gap: 12px; margin-bottom: 28px; animation: fadeUp 0.6s 0.5s ease both; }
   .social-btn {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: var(--warm-white); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; text-decoration: none; transition: all 0.2s; cursor: pointer;
+    height: 46px; padding: 0 20px; border-radius: 14px;
+    background: var(--bg-social); border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 500; color: var(--ink);
+    text-decoration: none;
+    transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1), background 0.45s, border-color 0.45s, color 0.45s;
+    box-shadow: var(--shadow-sm);
   }
-  .social-btn:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 16px var(--shadow); }
+  .social-btn:hover { border-color: var(--border-strong); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .social-btn .icon { font-size: 16px; }
 
-  .footer { text-align: center; font-size: 11px; color: var(--muted); animation: fadeUp 0.6s 0.6s ease both; }
-  .footer a { color: var(--accent); text-decoration: none; }
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center; font-size: 11px; color: var(--muted);
+    animation: fadeUp 0.6s 0.6s ease both;
+    display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;
+    transition: color 0.45s;
+  }
+  .footer a { color: var(--accent-soft); text-decoration: none; font-weight: 500; }
+  .footer-dot { opacity: 0.4; }
 
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
+    from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- Perfil -->
-  <div class="profile">
-    <div class="avatar-wrap">
-      <div class="avatar">
-        <img src="https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/8a7bf120ac6d0bd56c91e8cfd4a29f43~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=785df04f&x-expires=1772546400&x-signature=y%2Fszl9h0FRkdqnshM83Gsx8NSOE%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" alt="Matheus">
-      </div>
-      <div class="avatar-ring"></div>
-    </div>
-    <h1 class="profile-name">Matheus Jesus</h1>
-    <p class="profile-handle">@theuzin.txt.edits</p>
-    <p class="profile-bio">📚 E-books práticos para você <strong>transformar sua vida</strong> e conquistar seus objetivos.</p>
-  </div>
+<div class="bg-split"></div>
+<div class="bg-glow"></div>
 
-  <!-- Stats -->
-  <div class="stats">
-    <div class="stat"><div class="stat-num">6</div><div class="stat-label">E-books</div></div>
-    <div class="stat"><div class="stat-num">4.9★</div><div class="stat-label">Avaliação</div></div>
-    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Seguro</div></div>
-  </div>
-
-  <!-- Grupo 1: Pare de fumar -->
-  <p class="section-label">🚬 Pare de Fumar</p>
-  <div class="ebook-group">
-    <div class="cards">
-      <a class="card" href="https://pay.kiwify.com.br/tRcJ1Na" target="_blank">
-        <div class="card-icon">📖</div>
-        <div class="card-content">
-          <div class="card-title">Pare de fumar em 7 dias</div>
-          <div class="card-sub">E-book completo · PDF</div>
-        </div>
-        <div class="card-right">
-          <div class="card-price">R$9,90</div>
-        </div>
-      </a>
-      <a class="card premium" href="https://pay.kiwify.com.br/2K1MEez" target="_blank">
-        <div class="badge">⭐ Premium</div>
-        <div class="card-icon">✨</div>
-        <div class="card-content">
-          <div class="card-title">Pare de fumar em 7 dias — Versão Premium</div>
-          <div class="card-sub">Conteúdo exclusivo + bônus</div>
-        </div>
-        <div class="card-right">
-          <div class="card-price premium-price">R$15,00</div>
-        </div>
-      </a>
-    </div>
-  </div>
-
-  <hr class="group-sep">
-
-  <!-- Grupo 2: Luxúria -->
-  <p class="section-label">🧠 Vício da Luxúria</p>
-  <div class="ebook-group">
-    <div class="cards">
-      <a class="card" href="https://pay.kiwify.com.br/BgT5ynv" target="_blank">
-        <div class="card-icon">📖</div>
-        <div class="card-content">
-          <div class="card-title">Pare de vez com o vício da Luxúria</div>
-          <div class="card-sub">E-book completo · PDF</div>
-        </div>
-        <div class="card-right">
-          <div class="card-price">R$9,90</div>
-        </div>
-      </a>
-      <a class="card premium" href="https://pay.kiwify.com.br/xoPGyul" target="_blank">
-        <div class="badge">⭐ Premium</div>
-        <div class="card-icon">✨</div>
-        <div class="card-content">
-          <div class="card-title">Pare de vez com o vício da Luxúria — Premium</div>
-          <div class="card-sub">Conteúdo exclusivo + bônus</div>
-        </div>
-        <div class="card-right">
-          <div class="card-price premium-price">R$15,00</div>
-        </div>
-      </a>
-    </div>
-  </div>
-
-  <hr class="group-sep">
-
-  <!-- Grupo 3: Marketing Digital -->
-  <p class="section-label">💼 Marketing Digital</p>
-  <div class="ebook-group">
-    <div class="cards">
-      <a class="card" href="https://pay.kiwify.com.br/QADsAL7" target="_blank">
-        <div class="card-icon">📖</div>
-        <div class="card-content">
-          <div class="card-title">Aprenda a trabalhar com Marketing Digital</div>
-          <div class="card-sub">E-book completo · PDF</div>
-        </div>
-        <div class="card-right">
-          <div class="card-price">R$9,90</div>
-        </div>
-      </a>
-      <a class="card premium" href="https://pay.kiwify.com.br/H0tbbgU" target="_blank">
-        <div class="badge">⭐ Premium</div>
-        <div class="card-icon">✨</div>
-        <div class="card-content">
-          <div class="card-title">Marketing Digital de vez — Versão Premium</div>
-          <div class="card-sub">Conteúdo exclusivo + bônus</div>
-        </div>
-        <div class="card-right">
-          <div class="card-price premium-price">R$15,00</div>
-        </div>
-      </a>
-    </div>
-  </div>
-
-  <hr class="group-sep">
-
-  <!-- Redes sociais -->
-  <p class="section-label" style="text-align:center;">Me siga</p>
-  <div class="socials">
-    <a class="social-btn" href="https://instagram.com/theuzin.txt.edits" target="_blank" title="Instagram">📸</a>
-    <a class="social-btn" href="https://tiktok.com/@theuzin.txt01" target="_blank" title="TikTok">🎵</a>
-  </div>
-
-  <div class="footer">
-    Feito por ducalofc · Pagamento seguro via <a href="https://kiwify.com.br" target="_blank">Kiwify</a>
-  </div>
-
+<!-- Controles: idioma + tema -->
+<div class="controls">
+  <div class="lang-selector" id="langSelector"></div>
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙</button>
 </div>
+
+<!-- Conteúdo gerado pelo JS -->
+<div class="container" id="app"></div>
+
+<!-- =====================================================
+     SCRIPTS — NÃO EDITE ABAIXO (só se souber o que faz)
+===================================================== -->
+<script src="config.js"></script>
+<script src="i18n.js"></script>
+<script>
+  /* ── Estado ── */
+  let currentLang  = SITE_CONFIG.defaultLang;
+  let currentTheme = SITE_CONFIG.theme.defaultMode;
+
+  /* ── Utilitários ── */
+  const t = (key) => (I18N[currentLang] || I18N["pt-BR"])[key] || key;
+  const $ = (id) => document.getElementById(id);
+
+  /* ── Aplicar variáveis CSS do config.js ── */
+  function applyThemeVars() {
+    const th = SITE_CONFIG.theme;
+    const root = document.documentElement;
+    root.style.setProperty('--accent',       th.accentColor);
+    root.style.setProperty('--accent-deep',  th.accentDeep);
+    root.style.setProperty('--accent-soft',  th.accentSoft);
+    root.style.setProperty('--split-angle',  th.splitAngle);
+    root.style.setProperty('--split-ratio',  th.splitRatio);
+  }
+
+  /* ── Tema ── */
+  function toggleTheme() {
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    $('themeBtn').textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('theme', currentTheme); } catch(e) {}
+  }
+
+  function initTheme() {
+    try { const s = localStorage.getItem('theme'); if (s) currentTheme = s; } catch(e) {}
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    $('themeBtn').textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+  }
+
+  /* ── Idioma ── */
+  function setLang(lang) {
+    currentLang = lang;
+    document.documentElement.setAttribute('lang', lang);
+    try { localStorage.setItem('lang', lang); } catch(e) {}
+    renderLangSelector();
+    renderApp();
+  }
+
+  function initLang() {
+    try { const s = localStorage.getItem('lang'); if (s && I18N[s]) currentLang = s; } catch(e) {}
+    document.documentElement.setAttribute('lang', currentLang);
+  }
+
+  function renderLangSelector() {
+    if (!SITE_CONFIG.showLangSelector) { $('langSelector').style.display='none'; return; }
+    $('langSelector').innerHTML = AVAILABLE_LANGS.map(lang => `
+      <button class="lang-btn ${lang === currentLang ? 'active' : ''}" onclick="setLang('${lang}')">
+        ${(I18N[lang] || {}).lang_name || lang}
+      </button>
+    `).join('');
+  }
+
+  /* ── RENDER PRINCIPAL ── */
+  function renderApp() {
+    const cfg = SITE_CONFIG;
+    const p   = cfg.profile;
+
+    /* ── Avatar ── */
+    const avatarHtml = `
+      <div class="avatar-wrap">
+        <div class="avatar">
+          <img src="${p.avatar}" alt="${p.name}" onerror="this.style.display='none'">
+        </div>
+        <div class="avatar-ring"></div>
+        ${p.verified ? '<div class="verified-badge">✓</div>' : ''}
+      </div>
+    `;
+
+    /* ── Stats ── */
+    const statsHtml = cfg.stats.map(s => `
+      <div class="stat">
+        <div class="stat-num">${s.value}</div>
+        <div class="stat-label">${t(s.labelKey)}</div>
+      </div>
+    `).join('');
+
+    /* ── Grupos de produtos ── */
+    const groupsHtml = cfg.groups.map((group, gi) => {
+      const cardsHtml = group.products.map((prod, pi) => `
+        <a class="card ${prod.premium ? 'premium' : ''}" href="${prod.url}" target="_blank"
+           style="animation-delay:${0.12 + pi * 0.08}s">
+          ${prod.premium ? `<div class="badge">${t('badge_premium')}</div>` : ''}
+          <div class="card-icon">${prod.icon}</div>
+          <div class="card-content">
+            <div class="card-title">${t(prod.titleKey)}</div>
+            <div class="card-sub">${t(prod.subtitleKey)}</div>
+          </div>
+          <div class="card-right">
+            <div class="card-price">${prod.price}</div>
+            <div class="arrow">→</div>
+          </div>
+        </a>
+      `).join('');
+
+      return `
+        ${gi > 0 ? '<hr class="group-sep">' : ''}
+        <p class="section-label">${group.icon} ${t(group.titleKey)}</p>
+        <div class="ebook-group">
+          <div class="cards">${cardsHtml}</div>
+        </div>
+      `;
+    }).join('');
+
+    /* ── Redes sociais ── */
+    const socialsHtml = cfg.socials.map(s => `
+      <a class="social-btn" href="${s.url}" target="_blank">
+        <span class="icon">${s.icon}</span> ${s.label}
+      </a>
+    `).join('');
+
+    /* ── HTML final ── */
+    $('app').innerHTML = `
+      <div class="profile">
+        ${avatarHtml}
+        <h1 class="profile-name">${p.name}</h1>
+        <p class="profile-handle">${p.handle}</p>
+        <p class="profile-bio">${p.bio[currentLang] || p.bio["pt-BR"]}</p>
+        <div class="pill">${t('pill_secure')}</div>
+      </div>
+
+      <div class="stats">${statsHtml}</div>
+
+      ${groupsHtml}
+
+      <hr class="group-sep">
+      <p class="section-label" style="justify-content:center;">${t('section_follow')}</p>
+      <div class="socials">${socialsHtml}</div>
+
+      <div class="footer">
+        <span>${t('footer_made')} <strong>${cfg.footer.madeBy}</strong></span>
+        <span class="footer-dot">·</span>
+        <span>${t('footer_payment')} <a href="${cfg.footer.paymentUrl}" target="_blank">${cfg.footer.paymentLabel}</a></span>
+      </div>
+    `;
+
+    /* Atualiza título */
+    document.title = `${p.name} · E-books`;
+  }
+
+  /* ── INIT ── */
+  applyThemeVars();
+  initTheme();
+  initLang();
+  renderLangSelector();
+  renderApp();
+</script>
 </body>
 </html>
